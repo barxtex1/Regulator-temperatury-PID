@@ -34,6 +34,7 @@
 #include <string.h>
 
 float temperature = 21.37; // temperature from sensor
+float e;
 int32_t pressure; // pressure from sensor
 int8_t iter = 0;
 /* USER CODE END 0 */
@@ -228,9 +229,9 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 void SET_PID_TO_PWM(float pulse_width) {
   __HAL_TIM_SET_COMPARE( & htim3, TIM_CHANNEL_1, (uint32_t)(pulse_width));
 }
-void SEND_VIA_UART(UART_HandleTypeDef *huart,float temperature){
-    char *text = calloc(1,6);
-	sprintf((char*)text, "%.2f, ", temperature);
+void SEND_VIA_UART(UART_HandleTypeDef *huart,float temperature, float set, float e){
+    char *text = calloc(1,10);
+	sprintf((char*)text, "%.2f,%.2f,%.2f/n", temperature,set,e);
 	HAL_UART_Transmit(huart, (uint8_t*)text, strlen(text), 50);
 }
 void SEND_TO_LCD(float temp, float set){
@@ -261,8 +262,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef * htim) {
     SET_PID_TO_PWM(PID_Output_Signal(&pid ,temperature));
   }
   if (iter == 10) { // after 10 samples send it to UART
-	  SEND_VIA_UART(&huart3,temperature);
-	  SEND_TO_LCD(temperature, pid.setpoint);
+	e = pid.setpoint - temperature;
+	SEND_VIA_UART(&huart3,temperature,pid.setpoint,e);
+	SEND_TO_LCD(temperature, pid.setpoint);
     iter = 0;
   }
 }
