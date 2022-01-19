@@ -8,8 +8,8 @@
 
 void PID_Regulator_Init(PID_regulator * pid) {
   pid -> param.Kp = 0.11071524461; // K gain
-  pid -> param.Ki = 0.000387312937110031; // I gain 
-  pid -> param.Kd = 1.5023432595749; // D gain 
+  pid -> param.Ki = 0.00387312937110031; // I gain
+  //pid -> param.Kd = 1.5023432595749; // D gain
   pid -> param.Kc = 0.8 ;// antiwindup corrector
   pid -> param.dt = 0.1; // sample time
   pid -> param.limMax = 900; // saturation max 
@@ -85,7 +85,7 @@ float PID_Output_Signal(PID_regulator * PID, float measured) {
 	  PID -> signal_output = PID_Limit_Signal(PID);
 
 	  // anti wind up
-	  if (u_pid != PID -> signal_output) {
+	  if (u_pid > PID -> signal_output) {
 		  I = ( PID -> param.Ki )/( PID -> param.Kc ) * PID -> Integrator * (PID -> param.dt / 2.0);
 		  PID -> signal_output = (P + I + PID -> Differentiator)* PID -> tim_counter;
 	  }
